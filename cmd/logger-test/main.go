@@ -1,15 +1,3 @@
-# Golang logging package
-This logging package is a wrapper around the standard library's log package, giving you abstractions for logging at different levels.
-
-## Installation
-
-```shell
-  go get github.com/shuvava/go-logging/logging
-```
-
-## Usage
-
-```go
 package main
 
 import (
@@ -27,4 +15,3 @@ func main() {
 	// Calls os.Exit(1) after logging
 	log.Fatal("Bye.")
 }
-```
