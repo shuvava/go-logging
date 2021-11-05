@@ -50,7 +50,7 @@ func (l LogrusLogger) WithContext(ctx context.Context) Logger {
 	corrID := GetRequestID(ctx)
 	log := l.entry.WithContext(ctx)
 	if corrID != "" {
-		log = log.WithField(ContextKeyRequestID, corrID)
+		log = log.WithField(string(ContextKeyRequestID), corrID)
 	}
 	return LogrusLogger{entry: log}
 }
