@@ -26,8 +26,11 @@ const (
 	TraceLevel
 )
 
+// ContextKey type for context keys
+type ContextKey string
+
 // ContextKeyRequestID is correlationId key for context
-const ContextKeyRequestID = "correlationId"
+const ContextKeyRequestID = ContextKey("correlationId")
 
 // Fields type, used to pass to `WithFields`.
 type Fields map[string]interface{}
