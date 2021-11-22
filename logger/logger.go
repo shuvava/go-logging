@@ -41,8 +41,12 @@ type Logger interface {
 	SetLevel(level Level) error
 	// GetLevel returns current logging level
 	GetLevel() Level
-	// SetContext set logger context
-	SetContext(operation string) Logger
+	// SetOperation set logger context
+	SetOperation(operation string) Logger
+	// SetCorrelationID set logger context
+	SetCorrelationID(correlationID string) Logger
+	// GetCorrelationID returns current logger context
+	GetCorrelationID() string
 
 	// WithField adds a filed to log entry
 	WithField(key string, value interface{}) Logger

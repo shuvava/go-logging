@@ -19,15 +19,29 @@ type LogrusLogger struct {
 	CorrelationID string
 }
 
-// SetContext logger context (Operation, CorrelationID)
-func (l LogrusLogger) SetContext(operation string) Logger {
+// SetOperation logger context (Operation)
+func (l LogrusLogger) SetOperation(operation string) Logger {
 	correlationID := l.CorrelationID
 	if correlationID == "" {
 		correlationID = uuid.New().String()
 	}
 	return LogrusLogger{entry: l.entry.
-		WithField("Operation", operation).
+		WithField("Operation", operation)}
+}
+
+// SetCorrelationID set logger context
+func (l LogrusLogger) SetCorrelationID(correlationID string) Logger {
+	if correlationID == "" {
+		return l
+	}
+	l.CorrelationID = correlationID
+	return LogrusLogger{entry: l.entry.
 		WithField("CorrelationID", correlationID)}
+}
+
+// GetCorrelationID returns current logger context
+func (l LogrusLogger) GetCorrelationID() string {
+	return l.CorrelationID
 }
 
 // WithField adds a filed to log entry
@@ -48,7 +62,9 @@ func (l LogrusLogger) WithError(err error) Logger {
 // WithContext adds a context to the Entry.
 func (l LogrusLogger) WithContext(ctx context.Context) Logger {
 	corrID := GetRequestID(ctx)
-	log := l.entry.WithContext(ctx)
+	log := l.SetCorrelationID(corrID).(LogrusLogger).
+		entry.WithContext(ctx)
+
 	if corrID != "" {
 		log = log.WithField(string(ContextKeyRequestID), corrID)
 	}
