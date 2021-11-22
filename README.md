@@ -8,7 +8,7 @@ This logging package is a wrapper around the standard library's log package, giv
 ## Installation
 
 ```shell
-  go get github.com/shuvava/go-logging@v1.0.3
+  go get github.com/shuvava/go-logging@v1.0.4
 ```
 
 ## Usage
