@@ -7,8 +7,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,10 +19,6 @@ type LogrusLogger struct {
 
 // SetOperation logger context (Operation)
 func (l LogrusLogger) SetOperation(operation string) Logger {
-	correlationID := l.CorrelationID
-	if correlationID == "" {
-		correlationID = uuid.New().String()
-	}
 	return LogrusLogger{entry: l.entry.
 		WithField("Operation", operation)}
 }
@@ -34,9 +28,11 @@ func (l LogrusLogger) SetCorrelationID(correlationID string) Logger {
 	if correlationID == "" {
 		return l
 	}
-	l.CorrelationID = correlationID
-	return LogrusLogger{entry: l.entry.
-		WithField("CorrelationID", correlationID)}
+	return LogrusLogger{
+		CorrelationID: correlationID,
+		entry: l.entry.
+			WithField("CorrelationID", correlationID),
+	}
 }
 
 // GetCorrelationID returns current logger context
