@@ -89,17 +89,17 @@ func (l LogrusLogger) Warn(args ...interface{}) {
 
 // Error creates logs entry with Error level
 func (l LogrusLogger) Error(args ...interface{}) {
-	l.entry.Error(args...)
+	l.addCallerInfo().Error(args...)
 }
 
 // Fatal creates logs entry with Fatal level
 func (l LogrusLogger) Fatal(args ...interface{}) {
-	l.entry.Fatal(args...)
+	l.addCallerInfo().Fatal(args...)
 }
 
 // Panic creates logs entry with Panic level
 func (l LogrusLogger) Panic(args ...interface{}) {
-	l.entry.Panic(args...)
+	l.addCallerInfo().Panic(args...)
 }
 
 // SetOutput sets the output to desired io.Writer like file, stdout, stderr etc
@@ -123,6 +123,21 @@ func (l LogrusLogger) GetLevel() Level {
 	return ParseLogrusLevel(l.entry.Logger.Level)
 }
 
+func (l LogrusLogger) addCallerInfo() *logrus.Entry {
+	// Skip this function, and fetch the PC and file for its parent.
+	pc, file, line, _ := runtime.Caller(2)
+	// Retrieve a function object this functions parent.
+
+	// Regex to extract just the function name (and not the module path).
+	//runtimeFunc := regexp.MustCompile(`^.*\.(.*)$`)
+	//fname := runtimeFunc.ReplaceAllString(funcObj.Name(), "$1")
+	funcName := runtime.FuncForPC(pc).Name()
+	return l.entry.
+		WithField("File", file).
+		WithField("Line", line).
+		WithField("Func", funcName)
+}
+
 // TrackFuncTime creates log record with func execution time
 // require debug level or higher
 // usage:
@@ -136,17 +151,8 @@ func (l LogrusLogger) TrackFuncTime(start time.Time) {
 		return
 	}
 	elapsed := time.Since(start)
-	// Skip this function, and fetch the PC and file for its parent.
-	pc, _, _, _ := runtime.Caller(1)
-	// Retrieve a function object this functions parent.
-	funcObj := runtime.FuncForPC(pc)
 
-	// Regex to extract just the function name (and not the module path).
-	//runtimeFunc := regexp.MustCompile(`^.*\.(.*)$`)
-	//fname := runtimeFunc.ReplaceAllString(funcObj.Name(), "$1")
-	fname := funcObj.Name()
-
-	l.WithField("func", fname).
+	l.addCallerInfo().
 		WithField("executionTime", elapsed).
 		Debug("func execution completed")
 }
