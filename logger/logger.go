@@ -32,6 +32,9 @@ type ContextKey string
 // ContextKeyRequestID is correlationId key for context
 const ContextKeyRequestID = ContextKey("correlationId")
 
+// ContextKeyTenantID is tenantId key for context
+const ContextKeyTenantID = ContextKey("tenantId")
+
 // Fields type, used to pass to `WithFields`.
 type Fields map[string]interface{}
 
@@ -41,12 +44,18 @@ type Logger interface {
 	SetLevel(level Level) error
 	// GetLevel returns current logging level
 	GetLevel() Level
-	// SetOperation set logger context
+	// SetArea set area logger context
+	SetArea(area string) Logger
+	// SetOperation set operation logger context
 	SetOperation(operation string) Logger
 	// SetCorrelationID set logger context
 	SetCorrelationID(correlationID string) Logger
-	// GetCorrelationID returns current logger context
+	// GetCorrelationID returns CorrelationID for current logger context
 	GetCorrelationID() string
+	// SetTenantID set tenantID for current logger context
+	SetTenantID(tenantID string) Logger
+	// GetTenantID returns TenantID for current logger context
+	GetTenantID() string
 
 	// WithField adds a filed to log entry
 	WithField(key string, value interface{}) Logger
@@ -118,6 +127,17 @@ func GetRequestID(ctx context.Context) string {
 	reqID := ctx.Value(ContextKeyRequestID)
 
 	if ret, ok := reqID.(string); ok {
+		return ret
+	}
+
+	return ""
+}
+
+// GetTenantID will get tenantID from current context and return it as a string
+func GetTenantID(ctx context.Context) string {
+	tenantID := ctx.Value(ContextKeyTenantID)
+
+	if ret, ok := tenantID.(string); ok {
 		return ret
 	}
 

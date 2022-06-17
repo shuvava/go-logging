@@ -13,8 +13,17 @@ import (
 // LogrusLogger logrus.Logger implementation of interface
 type LogrusLogger struct {
 	Logger
-	entry         *logrus.Entry
+	entry *logrus.Entry
+	// CorrelationID is a unique identifier of the request.
 	CorrelationID string
+	// TenantID is a unique identifier of the tenant.
+	TenantID string
+}
+
+// SetArea logger context (Area)
+func (l LogrusLogger) SetArea(area string) Logger {
+	return LogrusLogger{entry: l.entry.
+		WithField("Area", area)}
 }
 
 // SetOperation logger context (Operation)
@@ -23,7 +32,19 @@ func (l LogrusLogger) SetOperation(operation string) Logger {
 		WithField("Operation", operation)}
 }
 
-// SetCorrelationID set logger context
+// SetTenantID set TenantID for current logger context
+func (l LogrusLogger) SetTenantID(tenantID string) Logger {
+	if tenantID == "" {
+		return l
+	}
+	return LogrusLogger{
+		TenantID: tenantID,
+		entry: l.entry.
+			WithField("TenantID", tenantID),
+	}
+}
+
+// SetCorrelationID set CorrelationID for logger context
 func (l LogrusLogger) SetCorrelationID(correlationID string) Logger {
 	if correlationID == "" {
 		return l
@@ -35,9 +56,14 @@ func (l LogrusLogger) SetCorrelationID(correlationID string) Logger {
 	}
 }
 
-// GetCorrelationID returns current logger context
+// GetCorrelationID returns CorrelationID for current logger context
 func (l LogrusLogger) GetCorrelationID() string {
 	return l.CorrelationID
+}
+
+// GetTenantID returns TenantID for current logger context
+func (l LogrusLogger) GetTenantID() string {
+	return l.TenantID
 }
 
 // WithField adds a filed to log entry
@@ -58,12 +84,11 @@ func (l LogrusLogger) WithError(err error) Logger {
 // WithContext adds a context to the Entry.
 func (l LogrusLogger) WithContext(ctx context.Context) Logger {
 	corrID := GetRequestID(ctx)
-	log := l.SetCorrelationID(corrID).(LogrusLogger).
+	tenantID := GetTenantID(ctx)
+	log := l.SetCorrelationID(corrID).
+		SetTenantID(tenantID).(LogrusLogger).
 		entry.WithContext(ctx)
 
-	if corrID != "" {
-		log = log.WithField(string(ContextKeyRequestID), corrID)
-	}
 	return LogrusLogger{entry: log}
 }
 
